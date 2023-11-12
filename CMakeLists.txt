@@ -50,6 +50,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # Use solution folders for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+
 # Package information
 
 # Set the name of this package.
@@ -93,6 +94,7 @@ option(WANT_OLD_FFT_FULL "Enable old mpn_mul_fft_full for multiplication" OFF)
 option(WANT_FAKE_CPUID "Enable GMP_CPU_TYPE faking cpuid" OFF)
 option(WANT_FAT_BINARY "Enable fat binary" OFF)
 option(WANT_CXX "Enable C++ wrapper" ON)
+option(GMP_SHARED_LIB "build as shared library" OFF)
 
 if(SIZEOF_VOID_P EQUAL 8)
   set(GMP_MPARAM_H_SUGGEST ${CMAKE_SOURCE_DIR}/mpn/x86_64/k8/gmp-mparam.h)
@@ -112,7 +114,16 @@ else()
   set(DEFN_LONG_LONG_LIMB "")
 endif()
 set(GMP_NAIL_BITS 0 CACHE STRING "Use nails on limbs")
-set(LIBGMP_DLL 1)
+
+
+if(GMP_SHARED_LIB)
+    set(LIB_TYPE SHARED)
+    set(LIBGMP_DLL 1)
+else()
+    set(LIB_TYPE STATIC)
+    set(LIBGMP_DLL 0)
+endif()
+
 set(CC ${CMAKE_C_COMPILER})
 set(CFLAG ${CMAKE_C_FLAGS})
 
@@ -415,7 +426,7 @@ set(
 )
 
 add_library(
-  libgmp SHARED
+  libgmp ${LIB_TYPE}
   ${LIBGMP_SOURCES}
   ${LIBGMP_EXTRA_SOURCES}
   $<TARGET_OBJECTS:libmpf>
@@ -452,7 +463,7 @@ install(
   COMPONENT Development)
 
 # Install libgmp PDB files.
-if(MSVC)
+if(MSVC AND GMP_SHARED_LIB)
   install(
     FILES $<TARGET_PDB_FILE:libgmp>
     DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -490,7 +501,7 @@ if(WANT_CXX)
   add_subdirectory(cxx)
   set(LIBGMPXX_SOURCES cxx/dummy.cc)
   add_library(
-    libgmpxx SHARED
+    libgmpxx ${LIB_TYPE}
     ${LIBGMPXX_SOURCES}
     $<TARGET_OBJECTS:libcxx>
   )
@@ -516,7 +527,7 @@ if(WANT_CXX)
     COMPONENT Development)
 
   # Install libgmpxx PDB files.
-  if(MSVC)
+  if(MSVC AND GMP_SHARED_LIB)
     install(
       FILES $<TARGET_PDB_FILE:libgmpxx>
       DESTINATION ${CMAKE_INSTALL_BINDIR}

@@ -202,7 +202,7 @@
 #cmakedefine HAVE_LIMB_LITTLE_ENDIAN 1
 
 /* Define to 1 if you have the `localeconv' function. */
-#cmakedefine HAVE_LOCALECONV 1
+#cmakedefine HAVE_LOCALECONV 0
 
 /* Define to 1 if you have the <locale.h> header file. */
 #cmakedefine HAVE_LOCALE_H 1
